@@ -1,0 +1,33 @@
+%{
+#include "berksezer-hw2.tab.h" 
+%}
+
+tLOCALPART [A-Za-z0-9\-_]+(([A-Za-z0-9\-_]*|\.?)[A-Za-z0-9\-_])*
+tDOMAIN [A-Za-z0-9]+[A-Za-z0-9\-]*[A-Za-z0-9]+|[A-Za-z0-9]{1}
+
+%%
+
+"Mail" return tMAIL;
+"end Mail" return tENDMAIL;
+"schedule" return tSCHEDULE;
+"end schedule" return tENDSCH;
+"send" return  tSEND;
+"set" return tSET;
+"to" return tTO;
+"from" return tFROM;
+@ return tAT;
+, return tCOMMA;
+: return tCOLON;
+\( return tLPR;
+\) return tRPR;
+\[ return tLBR;
+\] return tRBR;
+[a-zA-Z\_]+[a-zA-Z0-9\_]* return tIDENT;
+["][^\"]*["] return tSTRING;
+[0-9]{2}"/"[0-9]{2}"/"[0-9]{4} return tDATE;
+[0-9]{2}:[0-9]{2} return tTIME;
+
+{tLOCALPART}"@"({tDOMAIN}"."{tDOMAIN}"."{tDOMAIN}|{tDOMAIN}"."{tDOMAIN}) return tADDRESS;
+[ \t\n]+ 
+.			return yytext[0];
+%%

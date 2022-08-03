@@ -1,0 +1,74 @@
+  
+ int lineNum = 1;
+LOCAL [A-Za-z0-9_-]+("."?[A-Za-z0-9_-]+)*
+LABEL [A-Za-z0-9]+([A-Za-z0-9-]*[A-Za-z0-9]+)*
+	
+
+%%
+\n lineNum++;
+
+ 
+Mail printf("%d tMAIL\n", lineNum);
+"end Mail" printf("%d tENDMAIL\n", lineNum);
+"schedule" printf("%d tSCHEDULE\n", lineNum);
+"end schedule" printf("%d tENDSCH\n", lineNum);
+"send" printf("%d tSEND\n", lineNum);
+"to" printf("%d tTO\n", lineNum);
+"from" printf("%d tFROM\n", lineNum);
+"set" printf("%d tSET\n", lineNum);
+
+[0-9]{2}"/"[0-9]{2}"/"[0-9]{4} printf("%d tDATE (%s)\n", lineNum, yytext);
+[0-9]{2}":"[0-9]{2} printf("%d tTIME (%s)\n", lineNum, yytext);
+
+{LOCAL}"@"{LABEL}"."{LABEL}("."{LABEL})? printf("%d tADDRESS (%s)\n", lineNum, yytext);
+
+["][^"]*["] {
+int size = yyleng;
+const char nl = '"';
+char *result = (char *)malloc(sizeof(char)*size);
+int i = 1;
+int j = 0;
+int nCheck = 0;
+
+for(;i <size;)
+{
+if (yytext[i] == '\n'){
+lineNum++;
+nCheck = 1;
+}
+if (nl != yytext[i]){
+*(result+j) = yytext[i];
+i++; j++;
+}
+else {
+i++;
+}
+} 
+if (nCheck == 1) {
+	printf("%d tSTRING (%s)\n", lineNum-1, result);
+}
+else {
+printf("%d tSTRING (%s)\n", lineNum, result);
+}
+
+		}		
+[a-zA-Z_]+[a-zA-Z0-9_]* printf("%d tIDENT (%s)\n", lineNum, yytext);
+
+"," printf("%d tCOMMA\n", lineNum);
+":" printf("%d tCOLON\n", lineNum);
+"(" printf("%d tLPR\n", lineNum);
+")" printf("%d tRPR\n", lineNum);
+"[" printf("%d tLBR\n", lineNum);
+"]" printf("%d tRBR\n", lineNum);
+"@" printf("%d tAT\n", lineNum);
+
+" "+
+. printf("%d ILLEGAL CHARACTER (%s)\n", lineNum, yytext);
+
+
+%%
+int main() {
+yylex();
+return 0;
+
+}
